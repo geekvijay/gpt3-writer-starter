@@ -5,9 +5,28 @@ import buildspaceLogo from "../assets/buildspace-logo.png";
 
 const Home = () => {
   const [text, setText] = useState("");
+  const [output, setOutput] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleChange = (e) => {
+  const handleTextChange = (e) => {
     setText(e.currentTarget.value);
+  };
+
+  const handleGenerateClick = async () => {
+    setIsGenerating(true);
+
+    const res = await fetch("api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    });
+    const { output } = await res.json();
+    console.log(output.text);
+
+    setOutput(output.text);
+    setIsGenerating(false);
   };
 
   return (
@@ -28,16 +47,32 @@ const Home = () => {
               placeholder="start typing here"
               className="prompt-box"
               value={text}
-              onChange={handleChange}
+              onChange={handleTextChange}
             ></textarea>
 
             <div className="prompt-buttons">
-              <a className="generate-button">
+              <a
+                className={`generate-button ${isGenerating ? "loading" : ""}`}
+                onClick={handleGenerateClick}
+              >
                 <div className="generate">
                   <p>Generate</p>
                 </div>
               </a>
             </div>
+
+            {output && (
+              <div className="output">
+                <div className="output-header-container">
+                  <div className="output-header">
+                    <h3>Output</h3>
+                  </div>
+                </div>
+                <div className="output-content">
+                  <p>{output}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
